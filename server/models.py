@@ -1,14 +1,37 @@
-# Copyright 2024 mitchell
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# 
-#     http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
 
+db = SQLAlchemy()
+
+class Restaurant(db.Model):
+    __tablename__ = 'restaurants'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(225), nullable=False)
+    address = db.Column(db.String(225), nullable=False)
+
+    # Define the relationship with RestaurantPizza
+    pizzas = db.relationship('RestaurantPizza', back_populates='restaurant')
+
+class Pizza(db.Model):
+    __tablename__ = 'pizzas'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(225), nullable=False)
+    ingredients = db.Column(db.String(225), nullable=False)
+
+    # Define the relationship with RestaurantPizza
+    restaurants = db.relationship('RestaurantPizza', back_populates='pizza')
+
+class RestaurantPizza(db.Model):
+    __tablename__ = 'restaurant_pizzas'
+    id = db.Column(db.Integer, primary_key=True)
+    price = db.Column(db.Float, nullable=False)
+
+    # Define the foreign keys
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id', ondelete='CASCADE'), nullable=False)
+    pizza_id = db.Column(db.Integer, db.ForeignKey('pizzas.id', ondelete='CASCADE'), nullable=False)
+
+    # Define the relationships with Restaurant and Pizza
+    restaurant = db.relationship('Restaurant', back_populates='pizzas')
+    pizza = db.relationship('Pizza', back_populates='restaurants')
